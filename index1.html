@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>LuminaC® — 蓝牙耳机</title> <!-- 修改标题中的名称 -->
+  <style>
+    body{margin:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial;background:#f9fafb;color:#111827}
+    header{position:sticky;top:0;z-index:10;background:#fff;padding:12px 16px;box-shadow:0 2px 6px rgba(0,0,0,0.06);display:flex;justify-content:space-between;align-items:center}
+    h1{font-size:18px;margin:0}
+    main{max-width:960px;margin:0 auto;padding:16px;margin-bottom:20px}
+    .grid{display:grid;gap:16px;grid-template-columns:1fr}
+    .card{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.05);overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:transform .2s}
+    .card:hover{transform:translateY(-2px)}
+    .card img{width:100%;height:200px;object-fit:cover}
+    .card-body{padding:12px;flex:1;display:flex;flex-direction:column}
+    .title{font-size:15px;font-weight:600;margin-bottom:6px;line-height:1.3}
+    .price{font-size:16px;font-weight:700;color:#d32f2f;margin-top:auto}
+    .detail{display:none;animation:fadeIn 0.3s}
+    .detail.active{display:block}
+    .back{margin-bottom:12px;display:inline-block;padding:6px 10px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;cursor:pointer;font-size:14px}
+    .browse-hint{text-align:center;color:#6b7280;font-size:16px;margin-top:12px;padding:8px 0;line-height:1.5}
+    footer{text-align:center;padding:20px;font-size:13px;color:#6b7280}
+    .detail-layout{display:flex;flex-direction:column;gap:20px;background:#fff;padding:16px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.05);padding-bottom: 80px; /* 为底部固定栏留出空间 */}
+    @media(min-width:768px){.detail-layout{flex-direction:row;align-items:flex-start}}
+    .detail-image{flex:1;max-width:100%;position:relative}
+    .detail-image img{width:100%;height:auto;max-width:100%;border-radius:12px;margin-bottom:10px;box-shadow:0 2px 6px rgba(0,0,0,0.1)}
+    .image-hint{font-size:15px;color:#374151;margin:12px 0;text-align:center;cursor:pointer;line-height:1.6}
+    .thumbs{display:flex;gap:8px;margin-top:8px;overflow-x:auto}
+    .thumbs img{width:60px;height:60px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid transparent;transition:border .2s;flex-shrink:0}
+    .thumbs img.active{border-color:#4f46e5}
+    .detail-info{flex:2;display:flex;flex-direction:column;gap:12px}
+    .option-group{display:flex;gap:12px;margin:10px 0;flex-wrap:wrap}
+    .color-option{position:relative;width:40px;height:40px;border-radius:50%;cursor:pointer;border:2px solid #d1d5db;display:flex;align-items:center;justify-content:center;transition:all .2s}
+    .color-option span{position:absolute;bottom:-20px;font-size:12px;color:#374151}
+    .color-option input[type=radio]{display:none}
+    .color-option input[type=radio]:checked+div{border-color:#4f46e5;box-shadow:0 0 0 3px rgba(79,70,229,0.3)}
+    .color-swatch{width:24px;height:24px;border-radius:50%}
+    .quantity-selector{display:flex;align-items:center;gap:8px;margin:10px 0}
+    .quantity-selector button{padding:4px 10px;font-size:16px;border:1px solid #d1d5db;background:#fff;border-radius:6px;cursor:pointer;transition:all .2s}
+    .quantity-selector button:hover{background:#f3f4f6}
+    .quantity-selector input{width:40px;text-align:center;border:1px solid #d1d5db;border-radius:6px;height:32px}
+    .buy-section{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px;border-top:1px solid #e5e7eb;position: fixed; /* 固定在底部 */bottom: 0;left: 0;right: 0;background: white;z-index: 5;max-width: 960px;margin: 0 auto;box-shadow: 0 -2px 10px rgba(0,0,0,0.05);}
+    .buy-section button{padding:10px 16px;border:none;border-radius:8px;background:#4f46e5;color:#fff;font-size:15px;cursor:pointer;flex:1;transition:all .2s}
+    .buy-section button:hover{background:#4338ca}
+    .price-display{font-size:18px;font-weight:700;color:#d32f2f}
+    .tag{display:inline-block;padding:2px 6px;font-size:12px;border-radius:4px;background:#fde68a;color:#92400e;margin-right:6px}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>LuminaC®</h1> <!-- 修改左上角名称 -->
+    <div>购物车(0)</div>
+  </header>
+
+  <main>
+    <!-- 直接显示详情页，已移除返回按钮 -->
+    <section id="detailView" class="detail active">
+      <div id="detailContent"></div>
+    </section>
+  </main>
+
+  <footer>© 2025 LuminaC® — 示例页面</footer> <!-- 修改页脚名称 -->
+  <script>
+    // 震动反馈函数
+    function vibrate(duration) {
+      // 检查设备是否支持震动API
+      if ("vibrate" in navigator) {
+        navigator.vibrate(duration);
+      }
+    }
+
+    let quantity = 1;
+    const product = {
+      name:"AeroSound X1 无线蓝牙耳机",
+      price:99,
+      images:[
+        "https://youke1.picui.cn/s1/2025/10/15/68ef572d1f86c.png",
+        "https://youke1.picui.cn/s1/2025/10/15/68ef574b063a3.png",
+        "https://youke1.picui.cn/s1/2025/10/15/68ef57401d993.png",
+        "https://youke1.picui.cn/s1/2025/10/15/68ef56097ddc0.jpg",
+        "https://youke1.picui.cn/s1/2025/10/15/68ef562979455.png"
+      ]
+    };
+
+    function openDetail(){
+      document.getElementById('detailView').classList.add('active');
+      
+      // 进入详情页时触发125ms震动
+      vibrate(125);
+
+      let thumbsHTML = product.images.map((img,i)=>`<img src="${img}" class="${i===0?'active':''}" onclick="showImage(${i})">`).join('');
+
+      document.getElementById('detailContent').innerHTML = `
+        <div class="detail-layout">
+          <div class="detail-image">
+            <img id="mainImage" src="${product.images[0]}" alt="${product.name}">
+            <div class="image-hint" style="color: #f87171;" onclick="openLightbox(currentImageIndex)">点击上方图片，向右滑动查看产品功能介绍，请您仔细查看，返回问卷会有填空题需要填写。浏览完毕请关闭页面，继续填答问卷</div>
+            <div class="thumbs">${thumbsHTML}</div>
+          </div>
+          <div class="detail-info">
+            <!-- 已移除颜色选择部分 -->
+          </div>
+        </div>
+        
+        <!-- 底部购物车相关功能 -->
+        <div class="buy-section">
+          <div>
+            <div class="price-display" id="barPrice">¥${product.price}</div>
+            <div style="font-size:12px;color:#6b7280">包邮 | 限时优惠</div>
+          </div>
+          <div class="quantity-selector">
+            <button id="minusBtn">-</button>
+            <input type="text" id="quantityInput" value="1" readonly>
+            <button id="plusBtn">+</button>
+          </div>
+          <button id="addCartBtn">加入购物车</button>
+        </div>
+      `;
+
+      // 绑定购物车相关事件
+      document.getElementById('minusBtn').addEventListener('click',()=>changeQuantity(-1));
+      document.getElementById('plusBtn').addEventListener('click',()=>changeQuantity(1));
+      document.getElementById('addCartBtn').addEventListener('click', addToCart);
+      
+      // 为详情页图片添加点击震动事件
+      document.getElementById('mainImage').addEventListener('click', () => {
+        vibrate(125);
+      });
+    }
+
+    function changeQuantity(delta){
+      quantity = Math.max(1, quantity + delta);
+      document.getElementById('quantityInput').value = quantity;
+    }
+
+    function addToCart(){
+      alert(`已将 ${quantity} 件 ${product.name} 加入购物车！`);
+    }
+
+    function showImage(index){
+      document.getElementById('mainImage').src = product.images[index];
+      const thumbs = document.querySelectorAll('.thumbs img');
+      thumbs.forEach((img,i)=>img.classList.toggle('active',i===index));
+      
+      // 切换图片时触发125ms震动
+      vibrate(125);
+    }
+    
+    // 页面加载时直接显示详情页
+    window.addEventListener('load', openDetail);
+  </script>
+
+  <!-- 全屏大图预览容器 -->
+<div id="lightbox" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:1000;justify-content:center;align-items:center;flex-direction:column;">
+  <span id="closeLightbox" style="position:absolute;top:20px;right:30px;font-size:32px;color:#fff;cursor:pointer;">×</span>
+  <button id="prevBtn" style="position:absolute;left:20px;font-size:40px;color:#fff;background:none;border:none;cursor:pointer;">‹</button>
+  <img id="lightboxImage" src="" style="max-width:90%;max-height:80%;border-radius:12px;box-shadow:0 0 20px rgba(0,0,0,0.5)">
+  <button id="nextBtn" style="position:absolute;right:20px;font-size:40px;color:#fff;background:none;border:none;cursor:pointer;">›</button>
+</div>
+
+  <script>
+    let currentImageIndex = 0;
+
+    // 打开大图
+    function openLightbox(index){
+      currentImageIndex = index;
+      document.getElementById('lightboxImage').src = product.images[index];
+      document.getElementById('lightbox').style.display = 'flex';
+      
+      // 打开大图时触发125ms震动
+      vibrate(125);
+    }
+
+    // 关闭大图
+    function closeLightbox(){
+      document.getElementById('lightbox').style.display = 'none';
+    }
+
+    // 切换图片
+    function showLightboxImage(index){
+      if(index < 0) index = product.images.length - 1;
+      if(index >= product.images.length) index = 0;
+      currentImageIndex = index;
+      document.getElementById('lightboxImage').src = product.images[index];
+      
+      // 滑动切换图片时触125ms震动
+      vibrate(125);
+    }
+
+    // 事件绑定
+    document.getElementById('closeLightbox').addEventListener('click', closeLightbox);
+    document.getElementById('prevBtn').addEventListener('click', ()=>showLightboxImage(currentImageIndex-1));
+    document.getElementById('nextBtn').addEventListener('click', ()=>showLightboxImage(currentImageIndex+1));
+    document.getElementById('lightbox').addEventListener('click', (e)=>{
+      if(e.target.id === 'lightbox'){ closeLightbox(); }
+    });
+
+    // 让详情页里的大图可点击
+    document.addEventListener('click',(e)=>{
+      if(e.target.id === 'mainImage'){
+        openLightbox(currentImageIndex);
+      }
+    });
+
+    // 支持左右滑动切换
+    let startX = 0;
+    document.getElementById('lightbox').addEventListener('touchstart',(e)=>{ startX = e.touches[0].clientX; });
+    document.getElementById('lightbox').addEventListener('touchend',(e)=>{
+      let endX = e.changedTouches[0].clientX;
+      if(endX - startX > 50){ 
+        showLightboxImage(currentImageIndex-1); 
+      }
+      else if(startX - endX > 50){ 
+        showLightboxImage(currentImageIndex+1); 
+      }
+    });
+  </script>
+
+</body>
+</html>
