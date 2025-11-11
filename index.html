@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AERO — 蓝牙耳机</title>
+  <style>
+    body{margin:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial;background:#f9fafb;color:#111827}
+    header{position:sticky;top:0;z-index:10;background:#fff;padding:12px 16px;box-shadow:0 2px 6px rgba(0,0,0,0.06);display:flex;justify-content:space-between;align-items:center}
+    h1{font-size:18px;margin:0}
+    main{max-width:960px;margin:0 auto;padding:16px;margin-bottom:120px}
+    .grid{display:grid;gap:16px;grid-template-columns:1fr}
+    .card{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.05);overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:transform .2s}
+    .card:hover{transform:translateY(-2px)}
+    .card img{width:100%;height:200px;object-fit:cover}
+    .card-body{padding:12px;flex:1;display:flex;flex-direction:column}
+    .title{font-size:15px;font-weight:600;margin-bottom:6px;line-height:1.3}
+    .price{font-size:16px;font-weight:700;color:#d32f2f;margin-top:auto}
+    .detail{display:none;animation:fadeIn 0.3s}
+    .detail.active{display:block}
+    .back{margin-bottom:12px;display:inline-block;padding:6px 10px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;cursor:pointer;font-size:14px}
+    footer{text-align:center;padding:20px;font-size:13px;color:#6b7280}
+    .section{margin-bottom:20px}
+    .section h3{font-size:16px;margin:12px 0 8px;font-weight:600}
+    .section p{font-size:14px;color:#374151;line-height:1.6}
+    ul{font-size:14px;color:#374151;padding-left:20px;line-height:1.6}
+    .detail-layout{display:flex;flex-direction:column;gap:20px;background:#fff;padding:16px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.05)}
+    @media(min-width:768px){.detail-layout{flex-direction:row;align-items:flex-start}}
+    .detail-image{flex:1;max-width:100%;position:relative}
+    .detail-image img{width:100%;height:auto;max-width:100%;border-radius:12px;margin-bottom:10px;box-shadow:0 2px 6px rgba(0,0,0,0.1)}
+    .image-hint{font-size:13px;color:#6b7280;margin:8px 0;text-align:center;cursor:pointer}
+    .thumbs{display:flex;gap:8px;margin-top:8px;overflow-x:auto}
+    .thumbs img{width:60px;height:60px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid transparent;transition:border .2s;flex-shrink:0}
+    .thumbs img.active{border-color:#4f46e5}
+    .detail-info{flex:2;display:flex;flex-direction:column;gap:12px}
+    .option-group{display:flex;gap:12px;margin:10px 0;flex-wrap:wrap}
+    .color-option{position:relative;width:40px;height:40px;border-radius:50%;cursor:pointer;border:2px solid #d1d5db;display:flex;align-items:center;justify-content:center;transition:all .2s}
+    .color-option span{position:absolute;bottom:-20px;font-size:12px;color:#374151}
+    .color-option input[type=radio]{display:none}
+    .color-option input[type=radio]:checked+div{border-color:#4f46e5;box-shadow:0 0 0 3px rgba(79,70,229,0.3)}
+    .color-swatch{width:24px;height:24px;border-radius:50%}
+    .quantity-selector{display:flex;align-items:center;gap:8px;margin:10px 0}
+    .quantity-selector button{padding:4px 10px;font-size:16px;border:1px solid #d1d5db;background:#fff;border-radius:6px;cursor:pointer;transition:all .2s}
+    .quantity-selector button:hover{background:#f3f4f6}
+    .quantity-selector input{width:40px;text-align:center;border:1px solid #d1d5db;border-radius:6px;height:32px}
+    .buy-bar{position:fixed;bottom:0;left:0;width:100%;background:#fff;padding:10px 16px;box-shadow:0 -2px 6px rgba(0,0,0,0.1);display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:20;border-top:1px solid #e5e7eb}
+    .buy-bar button{padding:10px 16px;border:none;border-radius:8px;background:#4f46e5;color:#fff;font-size:15px;cursor:pointer;flex:1;transition:all .2s}
+    .buy-bar button:hover{background:#4338ca}
+    .price-display{font-size:18px;font-weight:700;color:#d32f2f}
+    .tag{display:inline-block;padding:2px 6px;font-size:12px;border-radius:4px;background:#fde68a;color:#92400e;margin-right:6px}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>AERO</h1>
+    <div>购物车(0)</div>
+  </header>
+
+  <main>
+    <section id="listView" class="grid">
+      <article class="card" id="productCard">
+        <img src="https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEBrchow37fzeX3CY0Ch9Zr15JiLKnO0gAC7BsAAr9DGVZQgL2YrmxYNjYE.jpg" alt="耳机">
+        <div class="card-body">
+          <div class="title">AeroSound X1 无线蓝牙耳机</div>
+          <div style="font-size:13px;color:#6b7280;margin-bottom:6px">主动降噪 · 30h续航</div>
+          <div class="price">¥199</div>
+        </div>
+      </article>
+    </section>
+
+    <section id="detailView" class="detail">
+      <button class="back" id="backBtn">← 返回</button>
+      <div id="detailContent"></div>
+    </section>
+  </main>
+
+  <div class="buy-bar" id="buyBar" style="display:none">
+    <div>
+      <div class="price-display" id="barPrice">¥199</div>
+      <div style="font-size:12px;color:#6b7280">包邮 | 限时优惠</div>
+    </div>
+    <div class="quantity-selector">
+      <button id="minusBtn">-</button>
+      <input type="text" id="quantityInput" value="1" readonly>
+      <button id="plusBtn">+</button>
+    </div>
+    <button id="addCartBtn">加入购物车</button>
+  </div>
+
+  <footer>© 2025 AERO — 示例页面</footer>
+
+  <script>
+    let quantity = 1;
+    const product = {
+      name:"AeroSound X1 无线蓝牙耳机",
+      price:199,
+      images:[
+        "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEBrchow37fzeX3CY0Ch9Zr15JiLKnO0gAC7BsAAr9DGVZQgL2YrmxYNjYE.jpg",
+        "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEBrcdow37SUXJqVY5XMQpF7SJf5O5kVgAC6xsAAr9DGVYAARva6Exga242BA.jpg",
+        "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEBrcZow37SxJvjHyrX1Q6ZXWVU-01sjQAC6hsAAr9DGVY1NikAAbY9YoY2BA.jpg",
+        "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEBrcRow37P289qcQABJt2wCChrPa4cfqwAAugbAAK_QxlWIJYksPGdbME2BA.jpg",
+        "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEBrcVow37Rwx2BqZ3HpNWgvobQ82OYngAC6RsAAr9DGVZC_jN4O5JF0jYE.jpg"
+      ],
+      desc:"AeroSound X1 结合了出色的音质与更长的续航，适合通勤、运动与移动办公。自适应 ANC 能根据环境自动调整降噪强度；低延迟模式保证游戏与通话体验。",
+      features:["主动降噪 (ANC) 技术","30 小时总续航","蓝牙 5.1 稳定连接","游戏模式低延迟","轻量化设计，舒适佩戴"],
+      specs:{
+        "蓝牙版本":"5.1",
+        "续航":"单次6小时，配合充电盒30小时",
+        "充电":"Type-C 快充，15分钟充电=3小时播放",
+        "重量":"单耳 4.5g",
+        "防水等级":"IPX5 防水"
+      }
+    };
+
+    function openDetail(){
+      document.getElementById('listView').style.display='none';
+      document.getElementById('detailView').classList.add('active');
+      document.getElementById('buyBar').style.display='flex';
+
+      const featureList = product.features.map(f=>`<li>${f}</li>`).join('');
+      const specList = Object.entries(product.specs).map(([k,v])=>`<li><strong>${k}：</strong>${v}</li>`).join('');
+      let thumbsHTML = product.images.map((img,i)=>`<img src="${img}" class="${i===0?'active':''}" onclick="showImage(${i})">`).join('');
+
+      document.getElementById('detailContent').innerHTML = `
+        <div class="detail-layout">
+          <div class="detail-image">
+            <img id="mainImage" src="${product.images[0]}" alt="${product.name}">
+            <div class="image-hint" onclick="openLightbox(currentImageIndex)">点击上方图片查看详情</div>
+            <div class="thumbs">${thumbsHTML}</div>
+          </div>
+          <div class="detail-info">
+            <div class="tag">热销</div>
+            <h2 style="font-size:20px;font-weight:600;margin-bottom:4px">${product.name}</h2>
+            <div style="font-size:20px;font-weight:700;color:#d32f2f;margin-bottom:8px">¥${product.price}</div>
+            <div style="font-size:12px;color:#6b7280;margin-bottom:12px">包邮 | 限时优惠</div>
+            <div class="section">
+              <h3>商品简介</h3>
+              <p>${product.desc}</p>
+            </div>
+            <div class="section">
+              <h3>产品特点</h3>
+              <ul>${featureList}</ul>
+            </div>
+            <div class="section">
+              <h3>规格参数</h3>
+              <ul>${specList}</ul>
+            </div>
+            <div class="section">
+              <h3>颜色选择</h3>
+              <div class="option-group">
+                <label class="color-option">
+                  <input type="radio" name="color" value="黑色" checked>
+                  <div class="color-swatch" style="background:#111"></div>
+                  <span>黑色</span>
+                </label>
+                <label class="color-option">
+                  <input type="radio" name="color" value="白色">
+                  <div class="color-swatch" style="background:#f5f5f5;border:1px solid #d1d5db"></div>
+                  <span>白色</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function goList(){
+      document.getElementById('listView').style.display='grid';
+      document.getElementById('detailView').classList.remove('active');
+      document.getElementById('buyBar').style.display='none';
+    }
+
+    function changeQuantity(delta){
+      quantity = Math.max(1, quantity + delta);
+      document.getElementById('quantityInput').value = quantity;
+    }
+
+    function addToCart(){
+      alert(`已将 ${quantity} 件 ${product.name} 加入购物车！`);
+    }
+
+    function showImage(index){
+      document.getElementById('mainImage').src = product.images[index];
+      const thumbs = document.querySelectorAll('.thumbs img');
+      thumbs.forEach((img,i)=>img.classList.toggle('active',i===index));
+    }
+
+    document.getElementById('productCard').addEventListener('click', openDetail);
+    document.getElementById('backBtn').addEventListener('click', goList);
+    document.getElementById('minusBtn').addEventListener('click',()=>changeQuantity(-1));
+    document.getElementById('plusBtn').addEventListener('click',()=>changeQuantity(1));
+    document.getElementById('addCartBtn').addEventListener('click', addToCart);
+  </script>
+
+  <!-- 全屏大图预览容器 -->
+<div id="lightbox" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:1000;justify-content:center;align-items:center;flex-direction:column;">
+  <span id="closeLightbox" style="position:absolute;top:20px;right:30px;font-size:32px;color:#fff;cursor:pointer;">×</span>
+  <button id="prevBtn" style="position:absolute;left:20px;font-size:40px;color:#fff;background:none;border:none;cursor:pointer;">‹</button>
+  <img id="lightboxImage" src="" style="max-width:90%;max-height:80%;border-radius:12px;box-shadow:0 0 20px rgba(0,0,0,0.5)">
+  <button id="nextBtn" style="position:absolute;right:20px;font-size:40px;color:#fff;background:none;border:none;cursor:pointer;">›</button>
+</div>
+
+  <script>
+    let currentImageIndex = 0;
+
+    // 打开大图
+    function openLightbox(index){
+      currentImageIndex = index;
+      document.getElementById('lightboxImage').src = product.images[index];
+      document.getElementById('lightbox').style.display = 'flex';
+    }
+
+    // 关闭大图
+    function closeLightbox(){
+      document.getElementById('lightbox').style.display = 'none';
+    }
+
+    // 切换图片
+    function showLightboxImage(index){
+      if(index < 0) index = product.images.length - 1;
+      if(index >= product.images.length) index = 0;
+      currentImageIndex = index;
+      document.getElementById('lightboxImage').src = product.images[index];
+    }
+
+    // 事件绑定
+    document.getElementById('closeLightbox').addEventListener('click', closeLightbox);
+    document.getElementById('prevBtn').addEventListener('click', ()=>showLightboxImage(currentImageIndex-1));
+    document.getElementById('nextBtn').addEventListener('click', ()=>showLightboxImage(currentImageIndex+1));
+    document.getElementById('lightbox').addEventListener('click', (e)=>{
+      if(e.target.id === 'lightbox'){ closeLightbox(); }
+    });
+
+    // 让详情页里的大图可点击
+    document.addEventListener('click',(e)=>{
+      if(e.target.id === 'mainImage'){
+        openLightbox(currentImageIndex);
+      }
+    });
+
+    // 支持左右滑动切换
+    let startX = 0;
+    document.getElementById('lightbox').addEventListener('touchstart',(e)=>{ startX = e.touches[0].clientX; });
+    document.getElementById('lightbox').addEventListener('touchend',(e)=>{
+      let endX = e.changedTouches[0].clientX;
+      if(endX - startX > 50){ showLightboxImage(currentImageIndex-1); }
+      else if(startX - endX > 50){ showLightboxImage(currentImageIndex+1); }
+    });
+  </script>
+
+</body>
+</html>
